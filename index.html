@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/mrturck/aframe-joystick/master/joystick.min.js"></script>
+
+    <script src="js/collider-check.js"></script>
+
+
+    <!--libreria de componentes-->
+    <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
+
+    <script src="js/info-message.js"></script>
+    <script src="js/highlight.js"></script>
+    <script src="js/info-panel.js"></script>
+    <style>
+
+      .button{
+        width: 100px; height: 100px;
+        position: absolute;z-index: 2;
+      }
+
+ </style>
+</head>
+<body>
+  <img id="up"src="img/up.png" class="button" style="bottom: 120px; left:120px;"/>
+  <img id="down" src="img/down.png" class="button" style="bottom: 20px; left:120px;"/>
+  <img id="left" src="img/left.png" class="button" style="bottom: 20px; left:20px;"/>
+  <img id="right"src="img/right.png" class="button" style="bottom: 20px; left:220px;"/>
+
+    <script>
+
+      let direction = new THREE.Vector3();
+      let movement = new THREE.Vector3();
+      function touchEndListener(){
+        movement = new THREE.Vector3();
+      }
+
+
+      function clickListener(ev){
+        
+           
+
+           let sceneEl = document.querySelector("#scene1");
+           let camDirection = sceneEl.camera.getWorldDirection(direction);
+           
+           camDirection.multiplyScalar(0.1);
+           let sampingDirection = camDirection.cross( new THREE.Vector3(0,0.6,0));
+
+           
+
+           if(ev.srcElement.id == "up"){
+            console.log('%cUP','font-size:2em;');
+            movement.x += camDirection.x;
+            movement.z += camDirection.z;
+
+           }else if(ev.srcElement.id == "down"){
+
+            console.log('%cDOWN','font-size:2em;');
+            movement.x -= camDirection.x;
+            movement.z -= camDirection.z;
+           }
+           
+
+           if(ev.srcElement.id == "left"){
+            console.log('%cLEFT','font-size:2em;');
+            movement.x -= sampingDirection.x;
+            movement.z -= sampingDirection.z;
+
+           }else if(ev.srcElement.id == "right"){
+
+            console.log('%cRIGHT','font-size:2em;');
+            movement.x += sampingDirection.x;
+            movement.z += sampingDirection.z;
+           }
+           
+
+           
+           
+
+      }
+      
+     
+
+     AFRAME.registerComponent('user-control',{
+
+       tick : function(){
+         if (movement.length()== 0){
+
+           return;
+         }
+         let cam =document.querySelector("#camera"); 
+           let position = cam.getAttribute('position');
+
+           position.x += movement.x;
+            position.z += movement.z;
+            cam.setAttribute('position',position);
+
+
+
+       },
+       
+       init: function(){
+         let up = document.querySelector("#up");
+         let down = document.querySelector("#down");
+         let left = document.querySelector("#left");
+         let right= document.querySelector("#right");
+
+         up.addEventListener("click",clickListener);
+         down.addEventListener("click",clickListener);
+         left.addEventListener("click",clickListener);
+         right.addEventListener("click",clickListener);
+         
+
+         up.addEventListener("touchstart",clickListener);
+         down.addEventListener("touchstart",clickListener);
+         left.addEventListener("touchstart",clickListener);
+         right.addEventListener("touchstart",clickListener);
+
+         up.addEventListener("touchend", touchEndListener);
+         down.addEventListener("touchend", touchEndListener);
+         left.addEventListener("touchend", touchEndListener);
+         right.addEventListener("touchend", touchEndListener);
+        
+          
+
+
+
+         },
+         
+         
+       
+     });
+
+
+    </script>
+    <!---->
+    <a-scene  id= "scene1" user-control joystick  vr-mode-ui="enabled: false">
+      <a-entity id ="camera"camera look-controls wasd-controls position="0 1.5 3 "></a-entity>
+  
+        <a-assets>
+            <!--Modelo 3D-->
+            <a-asset-item id="tree" src="https://cdn.glitch.com/63a6bc1d-ae82-4987-a511-4d8685401ffd%2FGallery_J-V2.glb?v=1607014806030"></a-asset-item>
+        
+        </a-assets>
+        <!--modelo 3d-->
+        <a-entity gltf-model="#tree"></a-entity>
+        <!--cuadro de mensaje-->
+        <a-asset-item id="messageText" src="message.html"></a-asset-item>
+        <!--cuadro de mensaje-->
+
+        <a-entity id="player" collider-check>
+            <a-entity raycaster="objects: a-box" position="0 -0.9 0" rotation="90 0 0"></a-entity>
+        </a-entity>
+        <!---->
+        <a-entity class="gltf" geometry="primitive: box" position="1 0 0"></a-entity>
+
+        <a-box position="-1 0.5 -3" rotation="4 0 0" color="#4CC3D9" class="raycastable"></a-box>
+        <a-entity geometry="primitive: plane" scale="0.5 0.5 0.5" position="4.249 4.693 -14.96"></a-entity>
+
+        <!--****************************************************-->
+        <!--
+        <a-entity
+        id="background"
+        position="0 0 0"
+        geometry="primitive: sphere; radius: 2.0"
+        material="color: red; side: back; shader: flat"
+        scale="0.001 0.001 0.001"
+        visible="false" class="raycastable">
+      </a-entity>
+
+      <a-entity
+        position="0 1.6 0"
+        camera look-controls="magicWindowTrackingEnabled: false; touchEnabled: false; mouseEnabled: false">
+        <a-entity
+          id="fadeBackground"
+          geometry="primitive: sphere; radius: 2.5"
+          material="color: black; side: back; shader: flat; transparent: true; opacity: 0.6" visible="false">
+        </a-entity>
+      </a-entity>
+      -->
+
+
+       
+        <!--cartas para darle click-->
+        <!--
+        <a-entity id="ui" position="0 1.6 -2.5">-->
+        <!-- Poster menu -->
+        <!--
+        <a-entity id="menu" highlight>
+          <a-entity id="karigurashiButton" position="-0.8 0 0" mixin="frame" class="raycastable menu-button">
+            <a-entity material="src: #karigurashiPoster;" mixin="poster"></a-entity>
+          </a-entity>
+
+          <a-entity id="kazetachinuButton" position="0 0 0" mixin="frame" class="raycastable menu-button">
+            <a-entity material="src: #kazetachinuPoster" mixin="poster"></a-entity>
+          </a-entity>
+
+          <a-entity id="ponyoButton" position="0.8 0 0" mixin="frame" class="raycastable menu-button">
+            <a-entity material="src: #ponyoPoster" mixin="poster"></a-entity>
+          </a-entity>
+        </a-entity>
+        -->
+        <!-- Info panel of the selected movie. -->
+        <!-- modales al darle click -->
+        <!--
+        <a-entity
+          id="infoPanel"
+          position="0 0 0.5"
+          info-panel
+          visible="false"
+          scale="0.001 0.001 0.001"
+          geometry="primitive: plane; width: 1.5; height: 1.8"
+          material="color: #333333; shader: flat; transparent: false" class="raycastable">
+          <a-entity id="ponyoMovieImage" mixin="movieImage" material="src: #ponyo" visible="false"></a-entity>
+          <a-entity id="kazetachinuMovieImage" mixin="movieImage" material="src: #kazetachinu" visible="false"></a-entity>
+          <a-entity id="karigurashiMovieImage" mixin="movieImage" material="src: #karigurashi" visible="false"></a-entity>
+          <a-entity id="movieTitle"
+            position="-0.68 -0.1 0"
+            text="shader: msdf; anchor: left; width: 1.5; font: https://cdn.aframe.io/examples/ui/Viga-Regular.json; color: white; value: Ponyo (2003)"></a-entity>
+          <a-entity id="movieDescription"
+            position="-0.68 -0.2 0"
+            text="baseline: top; shader: msdf; anchor: left; font: https://cdn.aframe.io/examples/ui/Viga-Regular.json; color: white; value: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."></a-entity>
+        </a-entity>
+
+        </a-entity>
+        -->
+
+    </a-scene>
+    
+</body>
+</html>
